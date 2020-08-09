@@ -4,7 +4,8 @@
   "description": "add macro power to javascript code",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/tests/manual_test.js",
+    "test": "jest"
   },
   "keywords": [
     "babel",
@@ -12,5 +13,9 @@
     "macro"
   ],
   "author": "shabaany",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.11.1",
+    "jest": "^26.2.2"
+  }
 }

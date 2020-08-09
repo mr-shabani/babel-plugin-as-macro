@@ -1,0 +1,3 @@
+run: 
+	clear
+	npm start
