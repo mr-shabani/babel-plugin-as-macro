@@ -1,14 +1,14 @@
 var apply_macro = require("../apply_macro");
 
 input = `
- var x = 1;
+var /*as macro*/ x = 1;
+var y = x;
 `;
 
-expected_output = 'var x = 1;';
+expected_output = 'var y = 1;';
 
-test("No change needed", () => {
+test("Simple variable declaration", () => {
 	output = apply_macro(input);
 	expect(output).toMatch(expected_output);
 });
-
 
