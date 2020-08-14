@@ -4,15 +4,20 @@ var plugin = require("../");
 const input = `
 // comment 
 any.expression;
-const /*as macro*/ m =1;
+var /*as macro*/ m =() => {
+    throw new Error("test error")
+};
 {
     /*as macro*/
     {
         var m1 = "this is macro";
         var m2 = process.cwd();
+        var m3 = {x:"string"};
     }
 }
 m2;
+m();
+var x = m3;
 `;
 
 const {code:output} = babel.transform(input, {plugins: [plugin]});

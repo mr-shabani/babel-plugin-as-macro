@@ -32,16 +32,17 @@ test("macro block statement that is not in root program", () => {
         }
         `;
 
-    var expected_output = `// comment 
-if (any) {
-  /*as macro*/
-  {
-    var m1 = "this is macro";
-  }
-}`;
+//     var expected_output = `// comment 
+// if (any) {
+//   /*as macro*/
+//   {
+//     var m1 = "this is macro";
+//   }
+// }`;
 
-	var output = apply_macro(input);
-	expect(output).toMatch(expected_output);
+    var expected_output = /Macro block only allowed in global scope!/;
+	var output = () => apply_macro(input);
+	expect(output).toThrowError(expected_output);
 });
 
 test("macro block statement that has more than one block", () => {
