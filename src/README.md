@@ -71,5 +71,62 @@ Macro block will be deleted from the code.
 The aim of macro is to execute some expression and replace the result in the code. Any expression that is sequence of object memberships, function calls and tag templates with a macro name as a main object will be caught as a macro expression. For example :
 ```javascript
 macroName.property.method(some,argument).tagTemplateMethod`some string`.anotherProperty
+macroName`this macro is a function`;
+macroName;
 ```
 Macro expression will be run in nodejs virtual machine([vm](https://nodejs.org/api/vm.html) module), and the result will be replaced in the code. For replacement we use `JSON.stringify`.
+#### Example 1:
+```javascript
+var /*as macro*/ m = {x:1};
+{/*as macro*/{
+	m.str = "some string";
+}}
+var obj = m;
+```
+<center>&darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp;</center> 
+
+```javascript
+var obj = {
+	"x": 1,
+	"str": "some string"
+};
+```
+
+#### Example 2:
+`JSON.stringify` will be ignored methods because of [closure](https://en.wikipedia.org/wiki/Closure_(computer_programming)). The code of a function is a half of its existence and another half is the scope that it binds to it.
+```javascript
+var /*as macro*/ m = {x:1};
+{/*as macro*/{
+	m.str = "some string";
+	m.f = function test(){
+		return `this function will be ignored
+			during replacement`;
+	};
+}}
+var obj = m;
+```
+<center>&darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp;</center> 
+
+```javascript
+var obj = {
+	"x": 1,
+	"str": "some string"
+};
+```
+#### Example 3:
+All occurrences of a macro name will be caught as macro expression. This may bite you.
+```javascript
+var /*as macro*/ m = "this is macro";
+var f = function (m){
+	let m = 1;
+	return m;
+};
+```
+<center>&darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp;</center> 
+
+```javascript
+var f = function ("this is macro"){
+	let "this is macro" = 1;
+	return "this is macro";
+};
+```
