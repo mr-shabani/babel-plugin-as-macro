@@ -1,6 +1,6 @@
 # <center>babel-plugin-as-macro</center>
 
-<center>power of macro in javascript code.</center>
+<center>Power of macro in javascript code.</center>
 
 ## Motivation
 
@@ -57,7 +57,7 @@ You can do anything that is possible in nodejs virtual machine([vm](https://node
 	var __ = y18n.__;
 	console.log("this will be printed at build time");
 	let x = 1; /* this is not macro because this is 
-	a locale variable that is only accessible in this block */
+	a local variable that is only accessible in this block */
 	while(x<10){
 		console.log(x);
 		x++;
@@ -68,11 +68,11 @@ Macro block will be deleted from the code.
 
 ### Macro Expression
 
-The aim of macro is to execute some expression and replace the result in the code. Any expression that is sequence of object memberships, function calls and tag templates with a macro name as a main object will be caught as a macro expression. For example :
+The aim of macro is to execute some expression and replace the result in the code. Any expression that is sequence of object memberships, function calls and tag templates with a macro name as a main object will be caught as a macro expression. 
 ```javascript
+macroName
+macroName`this macro is a function`
 macroName.property.method(some,argument).tagTemplateMethod`some string`.anotherProperty
-macroName`this macro is a function`;
-macroName;
 ```
 Macro expression will be run in nodejs virtual machine([vm](https://nodejs.org/api/vm.html) module), and the result will be replaced in the code. For replacement we use `JSON.stringify`.
 #### Example 1:
@@ -114,19 +114,65 @@ var obj = {
 };
 ```
 #### Example 3:
-All occurrences of a macro name will be caught as macro expression. This may bite you.
+All occurrences of a macro name, except variable definition, will be caught as macro expression. This can bite you.
 ```javascript
-var /*as macro*/ m = "this is macro";
-var f = function (m){
-	let m = 1;
-	return m;
+var /*as macro*/ m1 = "this is a macro",m2="this is another macro";
+var f = function double(m1){
+	let m2 = 2*m1;
+	return m2;
 };
 ```
 <center>&darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp;</center> 
 
 ```javascript
-var f = function ("this is macro"){
-	let "this is macro" = 1;
-	return "this is macro";
+var f = function double("this is a macro") {
+  let m2 = 2 * "this is a macro";
+  return "this is another macro";
 };
 ```
+
+## Plugin Options
+
+
+### followScopes
+`followScopes` is a boolean option that is `false` by default. If you set this option to `true`, you can use macro block and define macro variables in any scope. Then, macros only available in that scope. 
+```javascript
+var /*as macro*/ m1 = "this is a macro",m2="this is another macro";
+var f = function double(m1){
+	{/*as macro*/{
+		var localMacro = "this is local";
+	}}
+	let m2 = 2*m1;
+	var str = localMacro;
+	return m2;
+};
+var globalString = localMacro;
+```
+<center>&darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp;</center> 
+
+```javascript
+var f = function double(m1){
+	let m2 = 2*m1;
+	var str = "this is local";
+	return m2;
+};
+var globalString = localMacro;
+```
+But, why we don't set `followScopes` to `true` by default? Because people may have mistakes like as bellow.
+```javascript
+if(bool){
+	var /*as macro*/ m = "bool is true";
+}else{
+	var /*as macro*/ m = "bool is false";
+}
+var string = m;
+```
+<center>&darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp; &darr; &ensp;</center> 
+
+```javascript
+if(bool){
+}else{
+}
+var string = "bool is false";
+```
+Without regarding to variable `bool`, `string` is always `"bool is false"`. Because macros are run at build time when bool has not evaluated.
