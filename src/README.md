@@ -175,4 +175,4 @@ if(bool){
 }
 var string = "bool is false";
 ```
-Without regarding to variable `bool`, `string` is always `"bool is false"`. Because macros are run at build time when bool has not evaluated.
+Without regarding to variable `bool`, `string` is always `"bool is false"`. Because both macro definitions are executed and the second definition overwrite first. Also, macros are executed at build time when `bool` has not evaluated.
