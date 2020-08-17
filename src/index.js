@@ -54,7 +54,8 @@ module.exports = function(babel) {
 			},
 			Program(path, state) {
 				this.macroSpace.info.options = state.opts;
-				// console.dir(state);
+				this.macroSpace.info.envName = state.file.opts.envName;
+				// console.dir(state.file.opts);
 				path.traverse(mainObjectAndRootExpressionResolverVisitor);
 			}
 		}

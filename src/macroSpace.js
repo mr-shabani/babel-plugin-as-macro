@@ -15,29 +15,27 @@ const renameVariableToUniqueIdentifier = {
 class MacroSpace {
 	constructor(babel, state) {
 		this.babel = babel;
-		this.setInfo(state);
+		let absolutePath =
+			state.opts.filename || pathModule.join(state.opts.root, "fromString.js");
 		this.essentialObjects = {
 			console,
 			process,
-			...getRelativeRequireAndModule(this.info.absolutePath)
+			...getRelativeRequireAndModule(absolutePath)
 		};
+		this.setInfo(state);
 		this.context = vm.createContext({ ...this.essentialObjects });
 	}
 	setInfo(state) {
-		this.info = require("./info");
+		this.info = this.essentialObjects.require(require.resolve("./info"));
 		this.info.root = state.opts.root;
 		this.info.absolutePath =
 			state.opts.filename || pathModule.join(this.info.root, "fromString.js");
 		this.info.filename = pathModule.basename(this.info.absolutePath);
 		this.info.absoluteDir = pathModule.dirname(this.info.absolutePath);
-		this.info.relativeDir = pathModule.relative(
-			this.info.root,
-			this.info.absoluteDir
-		);
-		this.info.relativePath = pathModule.relative(
-			this.info.root,
-			this.info.absolutePath
-		);
+		this.info.relativeDir =
+			"./" + pathModule.relative(this.info.root, this.info.absoluteDir);
+		this.info.relativePath =
+			"./" + pathModule.relative(this.info.root, this.info.absolutePath);
 	}
 	hasLeadingCommentAsMacro(array) {
 		if (array[0].leadingComments) {
@@ -116,8 +114,7 @@ class MacroSpace {
 					this.info.absoluteDir,
 					pathModule.join(this.info.root, source)
 				);
-				if(source[0]!='.' && source[0]!='/')
-					source = './' + source;
+				if (source[0] != "." && source[0] != "/") source = "./" + source;
 			}
 			path.node.specifiers.forEach(node => {
 				if (node.type == "ImportDefaultSpecifier") {

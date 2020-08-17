@@ -2,5 +2,7 @@
 import some from "any module";
 1;
 "string";
+"jsCodeThatNeedsAsMacroPlugin.js";
 1;
 "string";
+"jsCodeThatNeedsAsMacroPlugin.js";
