@@ -1,4 +1,10 @@
 var vm = require("vm");
+var requireFromString = require("require-from-string");
+var pathModule = require("path");
+
+var getRelativeRequireAndModule = function(filePath) {
+	return requireFromString("module.exports = {require,module};", filePath);
+};
 
 const renameVariableToUniqueIdentifier = {
 	VariableDeclarator(path) {
@@ -7,13 +13,31 @@ const renameVariableToUniqueIdentifier = {
 };
 
 class MacroSpace {
-	constructor(babel) {
+	constructor(babel, state) {
 		this.babel = babel;
-		this.essentialObjects = { require, console, process, module };
+		this.setInfo(state);
+		this.essentialObjects = {
+			console,
+			process,
+			...getRelativeRequireAndModule(this.info.absolutePath)
+		};
 		this.context = vm.createContext({ ...this.essentialObjects });
 	}
-	setInfo(info) {
-		this.info = info;
+	setInfo(state) {
+		this.info = require("./info");
+		this.info.root = state.opts.root;
+		this.info.absolutePath =
+			state.opts.filename || pathModule.join(this.info.root, "fromString.js");
+		this.info.filename = pathModule.basename(this.info.absolutePath);
+		this.info.absoluteDir = pathModule.dirname(this.info.absolutePath);
+		this.info.relativeDir = pathModule.relative(
+			this.info.root,
+			this.info.absoluteDir
+		);
+		this.info.relativePath = pathModule.relative(
+			this.info.root,
+			this.info.absolutePath
+		);
 	}
 	hasLeadingCommentAsMacro(array) {
 		if (array[0].leadingComments) {
@@ -27,8 +51,8 @@ class MacroSpace {
 		if (!path.parentPath.isProgram()) {
 			let type;
 			if (path.isBlockStatement()) type = "block";
-			// else if(path.isImportDeclaration())   // this is not require because import statement 
-			// 	type = "import statement";			 // by default has to be in global 
+			// else if(path.isImportDeclaration())   // this is not require because import statement
+			// 	type = "import statement";			 // by default has to be in global
 			else if (path.isVariableDeclaration()) type = "variable definition";
 			throw path.buildCodeFrameError(
 				`as_macro: Macro ${type} only allowed in global scope!`
@@ -45,8 +69,8 @@ class MacroSpace {
 		}
 		if (path.isImportDeclaration()) {
 			if (this.hasLeadingCommentAsMacro(path.node.specifiers)) {
-				// if(!this.info.options.followScopes)     // this is not require because import statement 
-				// 	this.checkParentIsProgram(path);       // by default has to be in global 
+				// if(!this.info.options.followScopes)     // this is not require because import statement
+				// 	this.checkParentIsProgram(path);       // by default has to be in global
 				return true;
 			}
 			return false;
@@ -86,7 +110,15 @@ class MacroSpace {
 	getExecutableCode(path) {
 		if (path.isImportDeclaration()) {
 			let generated_code = "";
-			const source = path.node.source.value;
+			let source = path.node.source.value;
+			if (source[0] == ".") {
+				source = pathModule.relative(
+					this.info.absoluteDir,
+					pathModule.join(this.info.root, source)
+				);
+				if(source[0]!='.' && source[0]!='/')
+					source = './' + source;
+			}
 			path.node.specifiers.forEach(node => {
 				if (node.type == "ImportDefaultSpecifier") {
 					generated_code += `var ${node.local.name} = require("${source}");`;
