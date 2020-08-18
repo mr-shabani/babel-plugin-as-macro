@@ -17,5 +17,8 @@
   "devDependencies": {
     "@babel/core": "^7.11.1",
     "jest": "^26.2.2"
+  },
+  "dependencies": {
+    "require-from-string": "^2.0.2"
   }
 }
