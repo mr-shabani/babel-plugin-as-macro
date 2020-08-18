@@ -109,13 +109,13 @@ class MacroSpace {
 		if (path.isImportDeclaration()) {
 			let generated_code = "";
 			let source = path.node.source.value;
-			if (source[0] == ".") {
-				source = pathModule.relative(
-					this.info.absoluteDir,
-					pathModule.join(this.info.root, source)
-				);
-				if (source[0] != "." && source[0] != "/") source = "./" + source;
-			}
+			// if (source[0] == ".") {                // this part of the code change the import source 
+			// 	source = pathModule.relative(         // to be relative to the root directory
+			// 		this.info.absoluteDir,
+			// 		pathModule.join(this.info.root, source)
+			// 	);
+			// 	if (source[0] != "." && source[0] != "/") source = "./" + source;
+			// }
 			path.node.specifiers.forEach(node => {
 				if (node.type == "ImportDefaultSpecifier") {
 					generated_code += `var ${node.local.name} = require("${source}");`;
