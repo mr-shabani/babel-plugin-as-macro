@@ -2,22 +2,23 @@ var babel = require("@babel/core");
 var plugin = require("../");
 
 const input = `
-// comment 
-any.expression;
-const /*as macro*/ m =1;
-{
-    /*as macro*/
-    {
-        var m1 = "this is macro";
-        var m2 = process.cwd();
-    }
-}
-m2;
+import /*as macro*/ info from "./src/info";
+// info;
+info.filename;
+info.options.testOption;
 `;
 
-const {code:output} = babel.transform(input, {plugins: [plugin]});
+const { code: output } = babel.transform(input, {
+	plugins: [[plugin, { y: 2, testOption: true }]]
+});
+// const {
+// 	code: output
+// } = babel.transformFileSync(
+// 	"./src/tests/test_folder/another_folder/jsCodeThatNeedsAsMacroPlugin.js",
+// 	{ plugins: [[plugin, { y: 2 }]] }
+// );
 
 console.log(input);
-console.log(' ||   ||   ||   ||   ||');
-console.log(' \\/   \\/   \\/   \\/   \\/','\n');
+console.log(" ||   ||   ||   ||   ||");
+console.log(" \\/   \\/   \\/   \\/   \\/", "\n");
 console.log(output);

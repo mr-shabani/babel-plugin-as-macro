@@ -1,15 +1,20 @@
-var { MacroSpace, mainObjectAndRootExpressionResolverVisitor } = require("./helper");
+var {
+	MacroSpace,
+	mainObjectAndRootExpressionResolverVisitor,
+} = require("./helper");
+
 
 module.exports = function(babel) {
 	return {
 		name: "ast-transform", // not required
 		pre(state) {
-			this.macroSpace = new MacroSpace(babel);
+			this.macroSpace = new MacroSpace(babel,state);
 			this.enterExpression = function enterExpression(path) {
 				if (this.macroSpace.mustPathExecute(path)) {
 					this.macroSpace.executeAndReplace(path);
 				}
 			};
+			// console.dir(state);
 		},
 		visitor: {
 			Identifier: {
@@ -47,7 +52,10 @@ module.exports = function(babel) {
 					this.enterExpression(path);
 				}
 			},
-			Program(path) {
+			Program(path, state) {
+				this.macroSpace.info.options = state.opts;
+				this.macroSpace.info.envName = state.file.opts.envName;
+				// console.dir(state.file.opts);
 				path.traverse(mainObjectAndRootExpressionResolverVisitor);
 			}
 		}
