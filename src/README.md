@@ -175,4 +175,36 @@ if(bool){
 }
 var string = "bool is false";
 ```
-Without regarding to variable `bool`, `string` is always `"bool is false"`. Because both macro definitions are executed and the second definition overwrite first. Also, macros are executed at build time when `bool` has not evaluated.
+Without regarding to variable `bool`, `string` is always `"bool is false"`. Because both macro definitions are executed and the second definition overwrite first. Moreover, macros are executed at build time when `bool` has not evaluated.
+
+
+## Tools
+
+### info
+If you want to have some information about the file which macros are defined and executed in, You can use `info`. You can import it from `babel-plugin-as-macro/info` in any module and use it.
+For example you can have `conf.js` module that detect some config, like as language, from file path.
+```javascript 
+// conf.js
+var info = require('babel-plugin-as-macro/info');
+let someConfigurations = decideFrom(info.absolutePath);
+module.exports = someConfigurations;
+```
+Then, you can use this module as macro in your code.
+```javascript
+// main.js
+import /*as macro*/ conf from "./conf.js";
+/* do something with conf */
+```
+
+`info` is a object that will be filled by this plugin when plugin start.
+```javascript
+info = {
+	options, // plugin options
+	filename,
+	root,    // path to root of the project(directory of package.json)
+	absolutePath, // absolute path to the file 
+	absoluteDir,  // absolute path to the file directory
+	relativePath, // path to the file relative to the root
+	relativeDir,  // path to the directory relative to the root
+}
+```
