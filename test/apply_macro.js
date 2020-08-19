@@ -1,5 +1,5 @@
 var babel = require("@babel/core");
-var plugin = require("../");
+var plugin = require("../src/");
 
 module.exports = function(
 	input_code,

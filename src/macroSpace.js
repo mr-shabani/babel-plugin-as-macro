@@ -26,7 +26,7 @@ class MacroSpace {
 		this.context = vm.createContext({ ...this.essentialObjects });
 	}
 	setInfo(state) {
-		this.info = this.essentialObjects.require(require.resolve("./info"));
+		this.info = this.essentialObjects.require(require.resolve("../info"));
 		this.info.root = state.opts.root;
 		this.info.absolutePath =
 			state.opts.filename || pathModule.join(this.info.root, "fromString.js");

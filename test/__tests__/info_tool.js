@@ -3,7 +3,7 @@ var fs = require("fs");
 
 test("info that imported as macro", () => {
 	var input = `
-            import /*as macro*/ info from "./src/info";
+            import /*as macro*/ info from "./info";
             info.filename;
             info.options.testOption;
         `;
@@ -19,7 +19,7 @@ test("info that imported as macro", () => {
 
 test("info that imported in another module", () => {
 	var input = `
-            var /*as macro*/ { info } = require('./src/tests/module_for_test');
+            var /*as macro*/ { info } = require('./test/module_for_test');
             info.filename;
             info.options.testOption;
         `;
@@ -35,9 +35,9 @@ test("info that imported in another module", () => {
 
 test("info made for transformFileSync", () => {
 	var input_file =
-		"./src/tests/test_folder/another_folder/jsCodeThatNeedsAsMacroPlugin.js";
+		"./test/test_folder/another_folder/jsCodeThatNeedsAsMacroPlugin.js";
 	var expected_output = fs.readFileSync(
-		"./src/tests/test_folder/another_folder/expected_output.js",
+		"./test/test_folder/another_folder/expected_output.js",
 		"utf8"
 	);
 	var output = apply_macro(input_file, null, true);
