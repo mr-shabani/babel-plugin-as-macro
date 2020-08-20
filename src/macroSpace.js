@@ -16,7 +16,7 @@ class MacroSpace {
 	constructor(babel, state) {
 		this.babel = babel;
 		let absolutePath =
-			state.opts.filename || pathModule.join(state.opts.root, "fromString.js");
+			state.opts.filename || pathModule.join(state.opts.root, "unknown");
 		this.essentialObjects = {
 			console,
 			process,
@@ -29,7 +29,7 @@ class MacroSpace {
 		this.info = this.essentialObjects.require(require.resolve("../info"));
 		this.info.root = state.opts.root;
 		this.info.absolutePath =
-			state.opts.filename || pathModule.join(this.info.root, "fromString.js");
+			state.opts.filename || pathModule.join(this.info.root, "unknown");
 		this.info.filename = pathModule.basename(this.info.absolutePath);
 		this.info.absoluteDir = pathModule.dirname(this.info.absolutePath);
 		this.info.relativeDir =
@@ -109,13 +109,6 @@ class MacroSpace {
 		if (path.isImportDeclaration()) {
 			let generated_code = "";
 			let source = path.node.source.value;
-			// if (source[0] == ".") {                // this part of the code change the import source 
-			// 	source = pathModule.relative(         // to be relative to the root directory
-			// 		this.info.absoluteDir,
-			// 		pathModule.join(this.info.root, source)
-			// 	);
-			// 	if (source[0] != "." && source[0] != "/") source = "./" + source;
-			// }
 			path.node.specifiers.forEach(node => {
 				if (node.type == "ImportDefaultSpecifier") {
 					generated_code += `var ${node.local.name} = require("${source}");`;
@@ -145,7 +138,15 @@ class MacroSpace {
 			path.remove();
 			return;
 		}
-		var parsedAst = this.babel.parseSync(`var x = ${JSON.stringify(output)};`);
+		var stringify_output;
+		try {
+			stringify_output = JSON.stringify(output);
+		} catch (e) {
+			// e.message = e.name + ": " + e.message;
+			e.name = "as_macro";
+			throw path.buildCodeFrameError(e);
+		}
+		var parsedAst = this.babel.parseSync(`var x = ${stringify_output};`);
 		path.replaceWith(parsedAst.program.body[0].declarations[0].init);
 	}
 }

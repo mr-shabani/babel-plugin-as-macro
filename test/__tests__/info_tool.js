@@ -8,7 +8,7 @@ test("info that imported as macro", () => {
             info.options.testOption;
         `;
 
-	var expected_output = `"fromString.js";
+	var expected_output = `"unknown";
 "this option will be accessible from info tool.";`;
 
 	var output = apply_macro(input, {
@@ -24,7 +24,7 @@ test("info that imported in another module", () => {
             info.options.testOption;
         `;
 
-	var expected_output = `"fromString.js";
+	var expected_output = `"unknown";
 "this option will be accessible from info tool.";`;
 
 	var output = apply_macro(input, {

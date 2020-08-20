@@ -1,28 +1,36 @@
 {
-  "name": "babel-plugin-as-macro",
-  "version": "0.7.1",
-  "description": "add macro power to javascript code",
-  "main": "./src/index.js",
-  "scripts": {
-    "start": "node test/manual_test.js",
-    "test": "jest"
-  },
-  "keywords": [
-    "babel",
-    "plugin",
-    "as macro",
-    "macro"
-  ],
-  "author": {
-    "name":"Mohammad Reza Shabani",
-    "email": "shabaany@yahoo.com"
-  },
-  "license": "MIT",
-  "devDependencies": {
-    "@babel/core": "^7.11.1",
-    "jest": "^26.2.2"
-  },
-  "dependencies": {
-    "require-from-string": "^2.0.2"
-  }
+	"name": "babel-plugin-as-macro",
+	"version": "1.0.0",
+	"description": "add macro power to javascript code",
+	"main": "./src/index.js",
+	"scripts": {
+		"start": "node test/manual_test.js",
+		"test": "jest"
+	},
+	"keywords": [
+		"babel",
+		"plugin",
+		"as macro",
+		"macro"
+	],
+	"author": {
+		"name": "Mohammad Reza Shabani",
+		"email": "shabaany@yahoo.com"
+	},
+	"homepage": "https://github.com/mr-shabani/babel-plugin-as-macro",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/mr-shabani/babel-plugin-as-macro"
+	},
+	"publishConfig": {
+		"registry": "https://npm.pkg.github.com/"
+	},
+	"license": "MIT",
+	"devDependencies": {
+		"@babel/core": "^7.11.1",
+		"jest": "^26.2.2"
+	},
+	"dependencies": {
+		"require-from-string": "^2.0.2"
+	}
 }
