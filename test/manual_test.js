@@ -2,10 +2,11 @@ var babel = require("@babel/core");
 var plugin = require("../");
 
 const input = `
-import /*as macro*/ info from "./src/info";
-// info;
-info.filename;
-info.options.testOption;
+{/*as macro*/{
+	var obj = {};
+	obj.obj = obj;
+}}
+obj;
 `;
 
 const { code: output } = babel.transform(input, {
