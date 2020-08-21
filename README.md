@@ -31,7 +31,8 @@ Then, you must configure babel with `.babelrc` file.
 ```javascript
 {
 	//...
-	plugin: [
+	// "presets": ["next/babel"],  /* Add this line if you want to use with next.js */
+	"plugin": [
 		// other plugins that you want to 
 		// be executed before this plugin
 		["as-macro",/*plugin options*/],
