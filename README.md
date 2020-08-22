@@ -52,7 +52,7 @@ There are three ways to define a macro. Because of the nature of macro that is n
 You can define macro by importing a module. You must place the comment block `/*as macro*/` after `import` identifier.
 ```JSX
 import /*as macro*/ y18n from "y18n";
-import /*as macro*/ X,{x1 as y1,x2 as y2} from "anyModule";
+import /*as macro*/ X,{x1 as y1,x2 as y2} from "any nodejs module";
 ```
 The import statement will be deleted from the code.
 
