@@ -76,3 +76,19 @@ test("import from local files and from npm modules", () => {
 	var output = apply_macro(input);
 	expect(output).toMatch(expected_output);
 });
+
+test("import from local ECMAScript files", () => {
+	var input = `
+            import isNotMacro from "isNotMacro";
+            import /*as macro*/ local,{number as num} from "./test/ECMAScript_module_for_test";
+            local.number;
+            num;
+        `;
+
+    var expected_output = `import isNotMacro from "isNotMacro";
+1;
+2;`;
+
+	var output = apply_macro(input);
+	expect(output).toMatch(expected_output);
+});
