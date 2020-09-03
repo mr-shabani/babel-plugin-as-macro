@@ -1,6 +1,6 @@
 {
 	"name": "babel-plugin-as-macro",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "add macro power to javascript code",
 	"main": "./src/index.js",
 	"scripts": {
@@ -21,9 +21,6 @@
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/mr-shabani/babel-plugin-as-macro"
-	},
-	"publishConfig": {
-		"registry": "https://npm.pkg.github.com/"
 	},
 	"license": "MIT",
 	"devDependencies": {
