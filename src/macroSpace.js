@@ -111,9 +111,13 @@ class MacroSpace {
 			let source = path.node.source.value;
 			path.node.specifiers.forEach(node => {
 				if (node.type == "ImportDefaultSpecifier") {
-					generated_code += `var ${node.local.name} = require("${source}");`;
+					generated_code += `try{
+											var ${node.local.name} = require("${source}");
+										}catch(e){
+											var {default:${node.local.name}} = require("esm")(module)("${source}");
+										}`;
 				} else {
-					generated_code += `var {${node.imported.name}:${node.local.name}} = require("${source}");`;
+					generated_code += `var {${node.imported.name}:${node.local.name}} = require("esm")(module)("${source}");`;
 				}
 			});
 			return generated_code;

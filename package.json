@@ -28,6 +28,7 @@
 		"jest": "^26.2.2"
 	},
 	"dependencies": {
+		"esm": "^3.2.25",
 		"require-from-string": "^2.0.2"
 	}
 }
