@@ -53,9 +53,11 @@ There are three ways to define a macro. Because of the nature of macro that is n
 You can define macro by importing a module. You must place the comment block `/*as macro*/` after `import` identifier.
 ```JSX
 import /*as macro*/ y18n from "y18n";
-import /*as macro*/ X,{x1 as y1,x2 as y2} from "any nodejs module";
+import /*as macro*/ X,{x1 as y1,x2 as y2} from "anyModule";
 ```
 The import statement will be deleted from the code.
+
+In the import statement you can use ECMAScript modules(don't use `*.jsx`) or node modules. We use [esm ](https://github.com/standard-things/esm) module for importing ECMAScript modules.
 
 #### Variable Declaration
 You can define macro by defining variables. You must place the comment block `/*as macro*/` after `var` identifier.
@@ -116,7 +118,7 @@ var obj = {
 ```
 
 #### Example 2:
-`JSON.stringify` will be ignored methods because of [closure](https://en.wikipedia.org/wiki/Closure_(computer_programming)). The code of a function is  half of its existence and another half is the scope that it binds to it.
+`JSON.stringify` ignore methods because of [closure](https://en.wikipedia.org/wiki/Closure_(computer_programming)). The code of a function is  half of its existence and another half is the scope that binds to it.
 ```javascript
 var /*as macro*/ m = {x:1};
 {/*as macro*/{
