@@ -22,9 +22,6 @@
 		"type": "git",
 		"url": "https://github.com/mr-shabani/babel-plugin-as-macro"
 	},
-	"publishConfig": {
-		"registry": "https://npm.pkg.github.com/"
-	},
 	"license": "MIT",
 	"devDependencies": {
 		"@babel/core": "^7.11.1",
