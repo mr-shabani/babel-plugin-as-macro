@@ -1,6 +1,7 @@
 var vm = require("vm");
 var requireFromString = require("require-from-string");
 var pathModule = require("path");
+var scriptify = require("json-scriptify");
 
 var getRelativeRequireAndModule = function(filePath) {
 	return requireFromString("module.exports = {require,module};", filePath);
@@ -88,8 +89,11 @@ class MacroSpace {
 		if (path.node.mainObject === undefined) return false;
 		let mainObjectName = path.node.mainObject.node.name;
 		let mainObject_is_macro =
-			this.context.hasOwnProperty(mainObjectName) &&
-			!this.essentialObjects.hasOwnProperty(mainObjectName);
+			Object.prototype.hasOwnProperty.call(this.context, mainObjectName) &&
+			!Object.prototype.hasOwnProperty.call(
+				this.essentialObjects,
+				mainObjectName
+			);
 		let this_is_rootExpression = path.node.rootExpression === undefined;
 		return mainObject_is_macro && this_is_rootExpression;
 	}
@@ -142,15 +146,17 @@ class MacroSpace {
 			path.remove();
 			return;
 		}
-		var stringify_output;
+		var output_code;
 		try {
-			stringify_output = JSON.stringify(output);
+			if (this.info.options.useJsonStringify)
+				output_code = JSON.stringify(output);
+			else output_code = scriptify(output);
 		} catch (e) {
 			// e.message = e.name + ": " + e.message;
 			e.name = "as_macro";
 			throw path.buildCodeFrameError(e);
 		}
-		var parsedAst = this.babel.parseSync(`var x = ${stringify_output};`);
+		var parsedAst = this.babel.parseSync(`var x = ${output_code};`);
 		path.replaceWith(parsedAst.program.body[0].declarations[0].init);
 	}
 }
