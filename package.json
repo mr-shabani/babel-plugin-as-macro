@@ -25,10 +25,12 @@
 	"license": "MIT",
 	"devDependencies": {
 		"@babel/core": "^7.11.1",
+		"eslint": "^7.12.1",
 		"jest": "^26.2.2"
 	},
 	"dependencies": {
 		"esm": "^3.2.25",
+		"json-scriptify": "^0.8.0",
 		"require-from-string": "^2.0.2"
 	}
 }
