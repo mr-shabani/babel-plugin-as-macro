@@ -1,4 +1,5 @@
-var vm = require("vm");
+"use strict";
+var wvm = require("./wvm");
 var requireFromString = require("require-from-string");
 var pathModule = require("path");
 var scriptify = require("json-scriptify");
@@ -18,16 +19,13 @@ class MacroSpace {
 		this.babel = babel;
 		let absolutePath =
 			state.opts.filename || pathModule.join(state.opts.root, "unknown");
-		this.essentialObjects = {
-			console,
-			process,
-			...getRelativeRequireAndModule(absolutePath)
-		};
+		this.context = wvm.createGlobalContext(
+			getRelativeRequireAndModule(absolutePath)
+		);
 		this.setInfo(state);
-		this.context = vm.createContext({ ...this.essentialObjects });
 	}
 	setInfo(state) {
-		this.info = this.essentialObjects.require(require.resolve("../info"));
+		this.info = this.context.require(require.resolve("../info"));
 		this.info.root = state.opts.root;
 		this.info.absolutePath =
 			state.opts.filename || pathModule.join(this.info.root, "unknown");
@@ -86,22 +84,19 @@ class MacroSpace {
 			}
 			return false;
 		}
+		path.isMacroExpression = true;
 		if (path.node.mainObject === undefined) return false;
 		let mainObjectName = path.node.mainObject.node.name;
 		let mainObject_is_macro =
 			Object.prototype.hasOwnProperty.call(this.context, mainObjectName) &&
-			!Object.prototype.hasOwnProperty.call(
-				this.essentialObjects,
-				mainObjectName
-			);
+			!Object.prototype.hasOwnProperty.call(global, mainObjectName);
 		let this_is_rootExpression = path.node.rootExpression === undefined;
 		return mainObject_is_macro && this_is_rootExpression;
 	}
 	executeAndReplace(path) {
 		const code = this.getExecutableCode(path);
-		const script = new vm.Script(code);
 		try {
-			var output = script.runInContext(this.context);
+			var output = wvm.runInGlobalContext(code, this.context);
 		} catch (e) {
 			e.message = e.name + ": " + e.message;
 			e.name = "as_macro";
@@ -130,11 +125,13 @@ class MacroSpace {
 			path.traverse(renameVariableToUniqueIdentifier);
 		}
 		let node = path.node;
-		if (path.isBlockStatement()) node = path.node.body[0];
+		if (path.isBlockStatement()) node = path.node.body[0].body;
 
 		var newProgramAst = this.babel.parseSync("");
-		newProgramAst.program.body.push(node);
+		if (Array.isArray(node)) newProgramAst.program.body.push(...node);
+		else newProgramAst.program.body.push(node);
 		const { code } = this.babel.transformFromAstSync(newProgramAst);
+		if (path.isMacroExpression) return "return " + code;
 		return code;
 	}
 	replace(path, output) {

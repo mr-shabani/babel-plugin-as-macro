@@ -1,3 +1,4 @@
+'use strict';
 module.exports.MacroSpace = require("./macroSpace");
 
 const getRootExpression = function(path) {
