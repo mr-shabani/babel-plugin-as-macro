@@ -1,12 +1,11 @@
-'use strict';
+"use strict";
 const proxyContextSymbol = Symbol("proxy of context");
 
 const createGlobalContext = function(obj) {
-	const context = {};
-	const desc = Object.getOwnPropertyDescriptors(global);
-	Object.defineProperties(context, desc);
-	Object.setPrototypeOf(context, null);
-	if (typeof obj == "object" || obj != null)
+	const context = Object.create(null);
+	const globalDesc = Object.getOwnPropertyDescriptors(global);
+	Object.defineProperties(context, globalDesc);
+	if (typeof obj == "object" || obj !== null)
 		Object.defineProperties(context, Object.getOwnPropertyDescriptors(obj));
 	context.global = context;
 	context[proxyContextSymbol] = new Proxy(context, { has: () => true });

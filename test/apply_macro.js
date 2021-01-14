@@ -1,19 +1,20 @@
-var babel = require("@babel/core");
-var plugin = require("../src/");
+const babel = require("@babel/core");
+const plugin = require("../src/");
 
 module.exports = function(
 	input_code,
 	pluginOptions,
 	transform_from_file = false
 ) {
-    pluginOptions = pluginOptions || {};
+	pluginOptions = pluginOptions || {};
+	let newCode;
 	if (transform_from_file)
-		var { code: newCode } = babel.transformFileSync(input_code, {
+		newCode = babel.transformFileSync(input_code, {
 			plugins: [[plugin, pluginOptions]]
-		});
+		}).code;
 	else
-		var { code: newCode } = babel.transform(input_code, {
+		newCode = babel.transform(input_code, {
 			plugins: [[plugin, pluginOptions]]
-		});
+		}).code;
 	return newCode;
 };
