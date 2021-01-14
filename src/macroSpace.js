@@ -1,9 +1,10 @@
-var vm = require("vm");
-var requireFromString = require("require-from-string");
-var pathModule = require("path");
-var scriptify = require("json-scriptify");
+"use strict";
+const wvm = require("./wvm");
+const requireFromString = require("require-from-string");
+const pathModule = require("path");
+const scriptify = require("json-scriptify");
 
-var getRelativeRequireAndModule = function(filePath) {
+const getRelativeRequireAndModule = function(filePath) {
 	return requireFromString("module.exports = {require,module};", filePath);
 };
 
@@ -16,18 +17,15 @@ const renameVariableToUniqueIdentifier = {
 class MacroSpace {
 	constructor(babel, state) {
 		this.babel = babel;
-		let absolutePath =
+		const absolutePath =
 			state.opts.filename || pathModule.join(state.opts.root, "unknown");
-		this.essentialObjects = {
-			console,
-			process,
-			...getRelativeRequireAndModule(absolutePath)
-		};
+		this.context = wvm.createGlobalContext(
+			getRelativeRequireAndModule(absolutePath)
+		);
 		this.setInfo(state);
-		this.context = vm.createContext({ ...this.essentialObjects });
 	}
 	setInfo(state) {
-		this.info = this.essentialObjects.require(require.resolve("../info"));
+		this.info = this.context.require(require.resolve("../info"));
 		this.info.root = state.opts.root;
 		this.info.absolutePath =
 			state.opts.filename || pathModule.join(this.info.root, "unknown");
@@ -38,15 +36,13 @@ class MacroSpace {
 		this.info.relativePath =
 			"./" + pathModule.relative(this.info.root, this.info.absolutePath);
 	}
-	hasLeadingCommentAsMacro(array) {
-		if (array[0].leadingComments) {
-			if (array[0].leadingComments[0].value == "as macro") {
-				return true;
-			}
-		}
-		return false;
+	hasLeadingAsMacroComment(array) {
+		return (
+			array[0].leadingComments &&
+			array[0].leadingComments[0].value == "as macro"
+		);
 	}
-	checkParentIsProgram(path) {
+	ParentMustBeProgram(path) {
 		if (!path.parentPath.isProgram()) {
 			let type;
 			if (path.isBlockStatement()) type = "block";
@@ -60,14 +56,14 @@ class MacroSpace {
 	}
 	mustPathExecute(path) {
 		if (path.isVariableDeclaration()) {
-			if (this.hasLeadingCommentAsMacro(path.node.declarations)) {
-				if (!this.info.options.followScopes) this.checkParentIsProgram(path);
+			if (this.hasLeadingAsMacroComment(path.node.declarations)) {
+				if (!this.info.options.followScopes) this.ParentMustBeProgram(path);
 				return true;
 			}
 			return false;
 		}
 		if (path.isImportDeclaration()) {
-			if (this.hasLeadingCommentAsMacro(path.node.specifiers)) {
+			if (this.hasLeadingAsMacroComment(path.node.specifiers)) {
 				// if(!this.info.options.followScopes)     // this is not require because import statement
 				// 	this.checkParentIsProgram(path);       // by default has to be in global
 				return true;
@@ -79,29 +75,26 @@ class MacroSpace {
 				path.node.body.length == 1 &&
 				path.node.body[0].type == "BlockStatement"
 			) {
-				if (this.hasLeadingCommentAsMacro(path.node.body)) {
-					if (!this.info.options.followScopes) this.checkParentIsProgram(path);
+				if (this.hasLeadingAsMacroComment(path.node.body)) {
+					if (!this.info.options.followScopes) this.ParentMustBeProgram(path);
 					return true;
 				}
 			}
 			return false;
 		}
+		path.isMacroExpression = true;
 		if (path.node.mainObject === undefined) return false;
-		let mainObjectName = path.node.mainObject.node.name;
-		let mainObject_is_macro =
+		const mainObjectName = path.node.mainObject.node.name;
+		const mainObject_is_macro =
 			Object.prototype.hasOwnProperty.call(this.context, mainObjectName) &&
-			!Object.prototype.hasOwnProperty.call(
-				this.essentialObjects,
-				mainObjectName
-			);
-		let this_is_rootExpression = path.node.rootExpression === undefined;
+			!Object.prototype.hasOwnProperty.call(global, mainObjectName);
+		const this_is_rootExpression = path.node.rootExpression === undefined;
 		return mainObject_is_macro && this_is_rootExpression;
 	}
 	executeAndReplace(path) {
 		const code = this.getExecutableCode(path);
-		const script = new vm.Script(code);
 		try {
-			var output = script.runInContext(this.context);
+			var output = wvm.runInGlobalContext(code, this.context);
 		} catch (e) {
 			e.message = e.name + ": " + e.message;
 			e.name = "as_macro";
@@ -112,7 +105,7 @@ class MacroSpace {
 	getExecutableCode(path) {
 		if (path.isImportDeclaration()) {
 			let generated_code = "";
-			let source = path.node.source.value;
+			const source = path.node.source.value;
 			path.node.specifiers.forEach(node => {
 				if (node.type == "ImportDefaultSpecifier") {
 					generated_code += `try{
@@ -132,9 +125,10 @@ class MacroSpace {
 		let node = path.node;
 		if (path.isBlockStatement()) node = path.node.body[0];
 
-		var newProgramAst = this.babel.parseSync("");
+		const newProgramAst = this.babel.parseSync("");
 		newProgramAst.program.body.push(node);
 		const { code } = this.babel.transformFromAstSync(newProgramAst);
+		if (path.isMacroExpression) return "return " + code;
 		return code;
 	}
 	replace(path, output) {

@@ -1,7 +1,8 @@
-var apply_macro = require("../apply_macro");
+/* eslint-disable no-undef */
+const apply_macro = require("../apply_macro");
 
 test("Simple macro block statement", () => {
-    var input = `
+    const input = `
         // comment 
         any.expression;
         {
@@ -13,16 +14,15 @@ test("Simple macro block statement", () => {
         m1;
         `;
 
-    var expected_output = `// comment 
+    const expected_output = `// comment 
 any.expression;
 "this is macro";`;
-
-	var output = apply_macro(input);
+	const output = apply_macro(input);
 	expect(output).toMatch(expected_output);
 });
 
 test("macro block statement that is not in root program", () => {
-    var input = `
+    const input = `
         // comment 
         if(any) {
             /*as macro*/
@@ -31,22 +31,13 @@ test("macro block statement that is not in root program", () => {
             }
         }
         `;
-
-//     var expected_output = `// comment 
-// if (any) {
-//   /*as macro*/
-//   {
-//     var m1 = "this is macro";
-//   }
-// }`;
-
-    var expected_output = /Macro block only allowed in global scope!/;
-	var output = () => apply_macro(input);
+    const expected_output = /Macro block only allowed in global scope!/;
+	const output = () => apply_macro(input);
 	expect(output).toThrowError(expected_output);
 });
 
 test("macro block statement that has more than one block", () => {
-    var input = `
+    const input = `
         // comment 
         {
             /*as macro*/
@@ -57,7 +48,7 @@ test("macro block statement that has more than one block", () => {
         }
         `;
 
-    var expected_output = `// comment 
+    const expected_output = `// comment 
 {
   /*as macro*/
   {
@@ -66,12 +57,12 @@ test("macro block statement that has more than one block", () => {
   any.expression;
 }`;
 
-	var output = apply_macro(input);
+	const output = apply_macro(input);
 	expect(output).toMatch(expected_output);
 });
 
 test("macro block statement that has not block child", () => {
-    var input = `
+    const input = `
         // comment 
         {
             /*as macro*/
@@ -79,12 +70,12 @@ test("macro block statement that has not block child", () => {
         }
         `;
 
-    var expected_output = `// comment 
+    const expected_output = `// comment 
 {
   /*as macro*/
   var m1 = "this is macro";
 }`;
 
-	var output = apply_macro(input);
+	const output = apply_macro(input);
 	expect(output).toMatch(expected_output);
 });
