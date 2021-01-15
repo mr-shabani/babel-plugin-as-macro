@@ -4,6 +4,13 @@ const requireFromString = require("require-from-string");
 const pathModule = require("path");
 const scriptify = require("json-scriptify");
 
+const fineTuneReplacer = function(obj) {
+	if (typeof obj === "function") {
+		return scriptify.ignoreSomeProps(obj, ["arguments", "caller"]);
+	}
+	return obj;
+};
+
 const getRelativeRequireAndModule = function(filePath) {
 	return requireFromString("module.exports = {require,module};", filePath);
 };
@@ -144,7 +151,7 @@ class MacroSpace {
 		try {
 			if (this.info.options.useJsonStringify)
 				output_code = JSON.stringify(output);
-			else output_code = scriptify(output);
+			else output_code = scriptify(output, fineTuneReplacer);
 		} catch (e) {
 			// e.message = e.name + ": " + e.message;
 			e.name = "as_macro";

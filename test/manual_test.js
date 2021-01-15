@@ -1,16 +1,17 @@
-var babel = require("@babel/core");
-var plugin = require("../");
+const babel = require("@babel/core");
+const asMacroPlugin = require("../");
 
 const input = `
-{/*as macro*/{
-	var obj = {};
-	obj.obj = obj;
-}}
-obj;
+var /*as macro*/ m1 = "this is a macro",
+	m2 = "this is another macro";
+var f = function double(m1) {
+	let m2 = 2 * m1;
+	return m2;
+};
 `;
 
 const { code: output } = babel.transform(input, {
-	plugins: [[plugin, { y: 2, testOption: true }]]
+	plugins: [[asMacroPlugin, { y: 2, testOption: true }]]
 });
 // const {
 // 	code: output
