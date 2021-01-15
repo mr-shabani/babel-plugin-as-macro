@@ -1,4 +1,5 @@
-module.exports.MacroSpace = require("./macroSpace");
+"use strict";
+const MacroSpace = require("./macroSpace");
 
 const getRootExpression = function(path) {
 	let rootExpression = path.node.rootExpression;
@@ -8,7 +9,7 @@ const getRootExpression = function(path) {
 	return rootExpression;
 };
 
-module.exports.mainObjectAndRootExpressionResolverVisitor = {
+const mainObjectAndRootExpressionResolverVisitor = {
 	ThisExpression(path) {
 		path.node.mainObject = path;
 		path.node.name = "#";
@@ -52,4 +53,9 @@ module.exports.mainObjectAndRootExpressionResolverVisitor = {
 			});
 		}
 	}
+};
+
+module.exports = {
+	mainObjectAndRootExpressionResolverVisitor,
+	MacroSpace
 };

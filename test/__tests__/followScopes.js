@@ -1,7 +1,8 @@
-var apply_macro = require("../apply_macro"); 
+/* eslint-disable no-undef */
+const apply_macro = require("../apply_macro");
 
 test("define macro variable in function", () => {
-	var input = `
+	const input = `
         var f = function double(input){
             var /*as macro*/ m1 = "this is macro",m2="this is another macro";
             let m3 = 2*m1;
@@ -10,18 +11,18 @@ test("define macro variable in function", () => {
         m2;
 	`;
 
-	var expected_output = `var f = function double(input) {
+	const expected_output = `var f = function double(input) {
   let m3 = 2 * "this is macro";
   return "this is another macro";
 };
 
 m2;`;
-    var output = apply_macro(input,{followScopes:true});
+	const output = apply_macro(input, { followScopes: true });
 	expect(output).toMatch(expected_output);
 });
 
 test("define macro variable in two distinct function", () => {
-	var input = `
+	const input = `
         var f = function double(input){
             var /*as macro*/ m1 = "this is macro",m2="this is another macro";
             let m3 = 2*m1;
@@ -35,7 +36,7 @@ test("define macro variable in two distinct function", () => {
         m2;
 	`;
 
-	var expected_output = `var f = function double(input) {
+	const expected_output = `var f = function double(input) {
   let m3 = 2 * "this is macro";
   return "this is another macro";
 };
@@ -46,12 +47,12 @@ var f2 = function triple(input) {
 };
 
 m2;`;
-    var output = apply_macro(input,{followScopes:true});
+	const output = apply_macro(input, { followScopes: true });
 	expect(output).toMatch(expected_output);
 });
 
 test("macro block in function", () => {
-	var input = `
+	const input = `
         var f = function double(input){
             {/*as macro*/{
                 var m1 = "this is macro";
@@ -63,12 +64,12 @@ test("macro block in function", () => {
         m2;
 	`;
 
-	var expected_output = `var f = function double(input) {
+	const expected_output = `var f = function double(input) {
   let m3 = 2 * "this is macro";
   return "this is another macro";
 };
 
 m2;`;
-    var output = apply_macro(input,{followScopes:true});
+	const output = apply_macro(input, { followScopes: true });
 	expect(output).toMatch(expected_output);
 });
